@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios 2026 - Colegio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #1e3a5f;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        select:hover {
+            border-color: #2d5a8e;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #2d5a8e;
+            box-shadow: 0 0 0 3px rgba(45, 90, 142, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2d5a8e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3a5f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 142, 0.3);
+        }
+
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-admin {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-admin:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .schedule-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        .course-title {
+            font-size: 2em;
+            color: #1e3a5f;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .turno-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .day-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .day-tab {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .day-tab:hover {
+            border-color: #2d5a8e;
+            color: #2d5a8e;
+        }
+
+        .day-tab.active {
+            background: #2d5a8e;
+            color: white;
+            border-color: #2d5a8e;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .schedule-table th {
+            background: #2d5a8e;
+            color: white;
+            padding: 15px 10px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #1e3a5f;
+        }
+
+        .schedule-table td {
+            padding: 15px 10px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .schedule-table tr:hover td {
+            background: #f0f7ff;
+        }
+
+        .time-cell {
+            background: #f0f4f8;
+            font-weight: 700;
+            color: #1e3a5f;
+            white-space: nowrap;
+            width: 120px;
+        }
+
+        .subject-cell {
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            color: #2d5a8e;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .teacher-info {
+            font-size: 0.85em;
+            color: #666;
+            display: block;
+        }
+
+        .empty-cell {
+            background: #f8f9fa;
+            color: #999;
+            font-style: italic;
+        }
+
+        .pe-class {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            border: 2px solid #f59e0b;
+        }
+
+        .pe-class h3 {
+            color: #d97706;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .pe-class p {
+            color: #78350f;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #1e3a5f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #2d5a8e;
+            box-shadow: 0 0 0 3px rgba(45, 90, 142, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .edit-modal-content {
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .edit-form-group {
+            margin-bottom: 20px;
+        }
+
+        .edit-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e3a5f;
+        }
+
+        .edit-form-group input,
+        .edit-form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .edit-form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .success-msg {
+            color: #10b981;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            select {
+                width: 100%;
+            }
+
+            .schedule-table {
+                font-size: 0.85em;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 8px 4px;
+            }
+
+            .day-tabs {
+                gap: 4px;
+            }
+
+            .day-tab {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Horarios 2026</h1>
+            <p>Turno Tarde</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="course-select">Seleccionar Curso</label>
+                <select id="course-select">
+                    <option value="">-- Elegir Curso --</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="day-select">Seleccionar Día</label>
+                <select id="day-select">
+                    <option value="all">Todos los días</option>
+                    <option value="lunes">Lunes</option>
+                    <option value="martes">Martes</option>
+                    <option value="miercoles">Miércoles</option>
+                    <option value="jueves">Jueves</option>
+                    <option value="viernes">Viernes</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="renderSchedule()">Mostrar Horario</button>
+            <button class="btn btn-admin" onclick="showAdminLogin()">⚙️ Editar Horarios</button>
+        </div>
+
+        <div class="schedule-container" id="schedule-container">
+            <div class="no-data">
+                <p>Selecciona un curso para ver el horario</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-content">
+            <h2>🔐 Acceso de Administrador</h2>
+            <input type="password" class="password-input" id="admin-password" placeholder="Ingrese la contraseña" onkeypress="if(event.key==='Enter')verifyAdmin()">
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="verifyAdmin()">Verificar</button>
+                <button class="btn" style="background:#ddd;color:#333;" onclick="closeModal('admin-modal')">Cancelar</button>
+            </div>
+            <p class="error-msg" id="admin-error" style="display:none;"></p>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content edit-modal-content">
+            <h2>✏️ Editar Horario</h2>
+            <div id="edit-form">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-buttons" style="margin-top:20px;">
+                <button class="btn btn-secondary" onclick="saveChanges()">Guardar Cambios</button>
+                <button class="btn" style="background:#ddd;color:#333;" onclick="closeModal('edit-modal')">Cancelar</button>
+            </div>
+            <p class="success-msg" id="save-success" style="display:none;">¡Cambios guardados correctamente!</p>
+        </div>
+    </div>
+
+    <script>
+        const scheduleData = {
+            "1° 1°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Matemática I", tit: "Fernández Sixto", sup: "Choque Gustavo" }, martes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Ailán Mariela", sup: "" }, jueves: { materia: "Historia I", tit: "Flores Brenda", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Muñoz Roxana", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Matemática T", tit: "Fernández Sixto", sup: "Choque Gustavo" }, martes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Ailán Mariela", sup: "" }, jueves: { materia: "Historia I", tit: "Flores Brenda", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Muñoz Roxana", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Formación E. y C. T", tit: "Sosa Rodolfo", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Ailán Mariela", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Ailán Mariela", sup: "" }, jueves: { materia: "Historia I", tit: "Flores Brenda", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Muñoz Roxana", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "F. Ética y Ciudadana T", tit: "Sosa Rodolfo", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Ailán Mariela", sup: "" }, miercoles: { materia: "Biología T", tit: "Herrera Ariel", sup: "" }, jueves: { materia: "Matemática T", tit: "Fernández Sixto", sup: "Choque Gustavo" }, viernes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Educ. Tecnológica I", tit: "Graneros Joaquin", sup: "" }, martes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, miercoles: { materia: "Biología T", tit: "Herrera Ariel", sup: "" }, jueves: { materia: "Matemática T", tit: "Fernández Sixto", sup: "Choque Gustavo" }, viernes: { materia: "Educación Artística T", tit: "González Viviana", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Educ. Tecnológica I", tit: "Graneros Joaquin", sup: "" }, martes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, miercoles: { materia: "Biología T", tit: "Herrera Ariel", sup: "" }, jueves: { materia: "Matemática T", tit: "Fernández Sixto", sup: "Choque Gustavo" }, viernes: { materia: "Educación Artística T", tit: "González Viviana", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Educ. Tecnológica I", tit: "Graneros Joaquin", sup: "" }, martes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, miercoles: { materia: "", tit: "", sup: "" }, jueves: { materia: "F. Ética y Ciudadana T", tit: "Sosa Rodolfo", sup: "" }, viernes: { materia: "Educación Artística T", tit: "González Viviana", sup: "" } }
+                ],
+                edFisica: "Torres Norma - Lunes y Jueves 07:45 a 08:45"
+            },
+            "1° 2°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Historia I", tit: "Fernández Fabiana", sup: "" }, miercoles: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, jueves: { materia: "Educación Tecnológica I", tit: "Valdiviezo Rita", sup: "" }, viernes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Historia I", tit: "Fernández Fabiana", sup: "" }, miercoles: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, jueves: { materia: "Educación Tecnológica I", tit: "Valdiviezo Rita", sup: "" }, viernes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Biología T", tit: "Correa Georgina", sup: "" }, martes: { materia: "Lengua Extranjera I", tit: "Cardozo María", sup: "" }, miercoles: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, jueves: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, viernes: { materia: "Formación Ética y Ciudadana I", tit: "Sosa Carlos", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Biología T", tit: "Correa Georgina", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, miercoles: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, viernes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Formación Ética y Ciudadana I", tit: "Sosa Carlos", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, miercoles: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, jueves: { materia: "Biología T", tit: "Correa Georgina", sup: "" }, viernes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Formación Ética y Ciudadana I", tit: "Sosa Carlos", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, miercoles: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, jueves: { materia: "Lengua Extranjera I", tit: "Cardozo María", sup: "" }, viernes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Educación Tecnológica I", tit: "Valdiviezo Rita", sup: "" }, martes: { materia: "Historia I", tit: "Fernández Fabiana", sup: "" }, miercoles: { materia: "", tit: "", sup: "" }, jueves: { materia: "Lengua Extranjera I", tit: "Cardozo María", sup: "" }, viernes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" } }
+                ],
+                edFisica: "Mamaní Valeria - Martes y Viernes 10:30 a 11:30"
+            },
+            "1° 3°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, martes: { materia: "Biología I", tit: "Corbalán Maribel", sup: "Mamaní Elena" }, miercoles: { materia: "F. E. y C. T", tit: "Sosa Carlos", sup: "" }, jueves: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, viernes: { materia: "Historia I", tit: "Santucho Valeria", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, martes: { materia: "Biología I", tit: "Corbalán Maribel", sup: "Mamaní Elena" }, miercoles: { materia: "F. E. y C. T", tit: "Sosa Carlos", sup: "" }, jueves: { materia: "Historia I", tit: "Santucho Valeria", sup: "" }, viernes: { materia: "Historia I", tit: "Santucho Valeria", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Biología T", tit: "Corbalán Maribel", sup: "Mamaní Elena" }, martes: { materia: "Lengua y Literatura I", tit: "Nieva Sandra", sup: "" }, miercoles: { materia: "F. E. y C. T", tit: "Sosa Carlos", sup: "" }, jueves: { materia: "Geografía T", tit: "Albarracín Norma", sup: "Gutiérrez Herminia" }, viernes: { materia: "Geografía T", tit: "Albarracín Norma", sup: "Gutiérrez Herminia" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Lengua y Literatura I", tit: "Nieva Sandra", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Nieva Sandra", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Nieva Sandra", sup: "" }, jueves: { materia: "Geografía T", tit: "Albarracín Norma", sup: "Gutiérrez Herminia" }, viernes: { materia: "Educación Artística T", tit: "Ibarra Lorena", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Lengua y Literatura I", tit: "Nieva Sandra", sup: "" }, martes: { materia: "Educ. Tecnológica I", tit: "Del Moral Marcelo", sup: "" }, miercoles: { materia: "Matemática T", tit: "Pérez Sergio O.", sup: "Nicolini Eduardo" }, jueves: { materia: "Matemática T", tit: "Pérez Sergio", sup: "Nicolini Eduardo" }, viernes: { materia: "Educación Artística I", tit: "Ibarra Lorena", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Física I", tit: "Galán Lourdes", sup: "" }, martes: { materia: "Educ. Tecnológica I", tit: "Del Moral Marcelo", sup: "" }, miercoles: { materia: "Matemática I", tit: "Pérez Sergio", sup: "Nicolini Eduardo" }, jueves: { materia: "Matemática T", tit: "Pérez Sergio O.", sup: "Nicolini Eduardo" }, viernes: { materia: "Educación Artística T", tit: "Ibarra Lorena", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Física I", tit: "Galán Lourdes", sup: "" }, martes: { materia: "Educ. Tecnológica I", tit: "Del Moral Marcelo", sup: "" }, miercoles: { materia: "Física I", tit: "Galán Lourdes", sup: "" }, jueves: { materia: "Matemática T", tit: "Pérez Sergio", sup: "Nicolini Eduardo" }, viernes: { materia: "", tit: "", sup: "" } }
+                ],
+                edFisica: "Torres Norma - Lunes y Jueves 08:45 a 09:45"
+            },
+            "1° 4°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" }, martes: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Brito Cintia" }, miercoles: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Brito Cintia" }, jueves: { materia: "Historia T", tit: "Ortega Juan", sup: "" }, viernes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Ceballos Zulema", sup: "Brito Cintia" }, miercoles: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Brito Cintia" }, jueves: { materia: "Historia T", tit: "Ortega Juan", sup: "" }, viernes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Historia T", tit: "Ortega Juan C.", sup: "" }, martes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, miercoles: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Brito Cintia" }, jueves: { materia: "Geografía I", tit: "Díaz Gabriela", sup: "" }, viernes: { materia: "Educación Tecnológica I", tit: "Hoyos Magdalena", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Física I", tit: "Barrionuevo Pablo", sup: "" }, martes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, miercoles: { materia: "Matemática I", tit: "López Victoria", sup: "" }, jueves: { materia: "Matemática I", tit: "López Victoria", sup: "" }, viernes: { materia: "Educación Tecnológica I", tit: "Hoyos Magdalena", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Lengua Extranjera I", tit: "Argañaraz Deborah", sup: "" }, miercoles: { materia: "Matemática I", tit: "López Victoria", sup: "" }, jueves: { materia: "Matemática I", tit: "López Victoria", sup: "" }, viernes: { materia: "Educación Tecnológica I", tit: "Hoyos Magdalena", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Lengua Extranjera I", tit: "Argañaraz Deborah", sup: "" }, miercoles: { materia: "F.E. y C. T", tit: "Tolava Julio", sup: "Gutiérrez Evelith" }, jueves: { materia: "Matemática I", tit: "López Victoria", sup: "" }, viernes: { materia: "F.E. y C. T", tit: "Tolava Julio", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Lengua Extranjera I", tit: "Argañaraz Deborah", sup: "" }, miercoles: { materia: "F.E. y C. T", tit: "Tolava Julio", sup: "Gutiérrez Evelith" }, jueves: { materia: "", tit: "", sup: "" }, viernes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" } }
+                ],
+                edFisica: "Hyon Helvio N. Supl. Venica Carlos - Lunes y Miércoles 09:00 a 10:00"
+            },
+            "2° 1°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Biología T", tit: "Corbalán Maribel", sup: "López Alicia R." }, martes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Lengua Extranjera T", tit: "Argañaraz Deborah", sup: "" }, jueves: { materia: "Historia I", tit: "Brito Ariel", sup: "" }, viernes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Biología T", tit: "Corbalán Maribel", sup: "López Alicia R." }, martes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Lengua Extranjera T", tit: "Argañaraz Deborah", sup: "" }, jueves: { materia: "Química T", tit: "Yugra Ricardo", sup: "Flores Elida" }, viernes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Lengua Extranjera T", tit: "Argañaraz Deborah", sup: "" }, martes: { materia: "F. E. y C. T", tit: "Tolava Julio", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, jueves: { materia: "Química T", tit: "Yugra Ricardo", sup: "Flores Elida" }, viernes: { materia: "Historia I", tit: "Brito Ariel", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Matemática I", tit: "Casal Omar", sup: "" }, martes: { materia: "F. E. y C. T", tit: "Tolava Julio", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, jueves: { materia: "Química T", tit: "Yugra Ricardo", sup: "Flores Elida" }, viernes: { materia: "Historia I", tit: "Brito Ariel", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, martes: { materia: "F. E. y C. T", tit: "Tolava Julio", sup: "" }, miercoles: { materia: "Educación Artística T", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Geografía T", tit: "Herrera Marcela", sup: "" }, viernes: { materia: "Educación Tecnológica T", tit: "Hoyos Gregoria", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, martes: { materia: "Biología T", tit: "Corbalán Maribel", sup: "López Alicia R." }, miercoles: { materia: "Educación Artística T", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Geografía T", tit: "Herrera Marcela", sup: "" }, viernes: { materia: "Educación Tecnológica T", tit: "Hoyos Gregoria", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "", tit: "", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, miercoles: { materia: "Educación Artística T", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Geografía T", tit: "Herrera Marcela", sup: "" }, viernes: { materia: "Educación Tecnológica T", tit: "Hoyos Gregoria", sup: "" } }
+                ],
+                edFisica: "Subelza Sergio - Lunes y Miércoles 10:00 a 11:00"
+            },
+            "2° 2°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, martes: { materia: "Form. Ética y Ciudadana T", tit: "Sosa Carlos", sup: "" }, miercoles: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Matemática I", tit: "Casal Omar", sup: "" }, viernes: { materia: "Biología T", tit: "Rivero Silvia", sup: "Acuña Esteban" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, martes: { materia: "Form. Ética y Ciudadana T", tit: "Sosa Carlos", sup: "" }, miercoles: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, jueves: { materia: "Matemática T", tit: "Casal Omar A.", sup: "" }, viernes: { materia: "Biología I", tit: "Rivero Silvia", sup: "Acuña Esteban" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Lengua Extranjera I", tit: "Torres Vanesa", sup: "" }, martes: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" }, miercoles: { materia: "Lengua y Literatura T", tit: "Zerpa Noemí", sup: "" }, jueves: { materia: "Lengua Extranjera I", tit: "Torres Vanesa", sup: "" }, viernes: { materia: "Biología I", tit: "Rivero Silvia", sup: "Acuña Esteban" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Educación Artística I", tit: "Santucho Gabriela", sup: "" }, martes: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" }, miercoles: { materia: "Form. Ética y Ciudadana T", tit: "Sosa Carlos", sup: "" }, jueves: { materia: "Lengua Extranjera I", tit: "Torres Vanesa", sup: "" }, viernes: { materia: "Matemática T", tit: "Casal Omar", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Geografía I", tit: "Herrera Marcela", sup: "" }, martes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Educación Tecnológica T", tit: "Pérez Javier", sup: "" }, jueves: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" }, viernes: { materia: "Química I", tit: "Díaz Ruth", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Geografía I", tit: "Herrera Marcela", sup: "" }, martes: { materia: "Matemática T", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Educación Tecnológica T", tit: "Pérez Javier", sup: "" }, jueves: { materia: "Lengua y Literatura T", tit: "Zerpa Noemi", sup: "" }, viernes: { materia: "Química I", tit: "Díaz Ruth F.", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Geografía I", tit: "Herrera Marcela", sup: "" }, martes: { materia: "", tit: "", sup: "" }, miercoles: { materia: "Educación Tecnológica T", tit: "Pérez Javier", sup: "" }, jueves: { materia: "Lengua y Literatura T", tit: "Zerpa Noemi", sup: "" }, viernes: { materia: "Química I", tit: "Díaz Ruth", sup: "" } }
+                ],
+                edFisica: "Figueroa Abel - Martes y Jueves 9:00 a 10:00"
+            },
+            "2° 3°": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Química I", tit: "Delgado Alicia", sup: "" }, martes: { materia: "Matemática T", tit: "González María", sup: "" }, miercoles: { materia: "Lengua y Literatura T", tit: "Laguna Milagro", sup: "" }, jueves: { materia: "Form. E. y Ciudadana I", tit: "Sosa Carlos", sup: "" }, viernes: { materia: "Educación Tecnológica T", tit: "Hoyos Magdalena", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "Frances Priscila" }, martes: { materia: "Matemática T", tit: "González María", sup: "" }, miercoles: { materia: "Lengua y Literatura T", tit: "Laguna Milagro", sup: "" }, jueves: { materia: "Form. E. y Ciudadana I", tit: "Sosa Carlos", sup: "" }, viernes: { materia: "Educación Tecnológica T", tit: "Hoyos Magdalena", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "Frances Priscila" }, martes: { materia: "Química I", tit: "Delgado Alicia", sup: "" }, miercoles: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, jueves: { materia: "Educación Artística I", tit: "González Viviana", sup: "" }, viernes: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "Frances Priscila" }, martes: { materia: "Química I", tit: "Delgado Alicia", sup: "" }, miercoles: { materia: "Educación Tecnológica T", tit: "Hoyos Magdalena", sup: "" }, jueves: { materia: "Educación Artística I", tit: "González Viviana", sup: "" }, viernes: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, martes: { materia: "Lengua y Literatura T", tit: "Laguna Milagros", sup: "" }, miercoles: { materia: "Geografía T", tit: "Mamani Ivana", sup: "" }, jueves: { materia: "Educación Artística I", tit: "González Viviana", sup: "" }, viernes: { materia: "Matemática T", tit: "González María", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, martes: { materia: "Lengua y Literatura T", tit: "Laguna Milagros", sup: "" }, miercoles: { materia: "Geografía T", tit: "Mamani Ivana", sup: "" }, jueves: { materia: "Historia T", tit: "Aguirre Graciela", sup: "" }, viernes: { materia: "Matemática T", tit: "González María", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Form. E. y Ciudadana I", tit: "Sosa Carlos", sup: "" }, martes: { materia: "Lengua y Literatura T", tit: "Laguna Milagros", sup: "" }, miercoles: { materia: "Geografía T", tit: "Mamani Ivana", sup: "" }, jueves: { materia: "", tit: "", sup: "" }, viernes: { materia: "Matemática T", tit: "González María", sup: "" } }
+                ],
+                edFisica: "Colque Ana M. - Lunes y Miércoles 11:00 a 12:00"
+            },
+            "3° 1° - CS. NATURALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Geografía I", tit: "Herrera Marcela", sup: "" }, martes: { materia: "Matemática T", tit: "Pérez Sergio O.", sup: "Montes Johana" }, miercoles: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, jueves: { materia: "Ciencias de la Tierra I", tit: "Díaz Gabriela", sup: "" }, viernes: { materia: "Física I", tit: "Casal Omar", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Geografía I", tit: "Herrera Marcela", sup: "" }, martes: { materia: "Matemática I", tit: "Pérez Sergio", sup: "Montes Johana" }, miercoles: { materia: "Biología I", tit: "Araoz Raquel", sup: "" }, jueves: { materia: "Ciencias de la Tierra I", tit: "Díaz Gabriela", sup: "" }, viernes: { materia: "Física I", tit: "Casal Omar", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Historia I", tit: "Aguirre Graciela", sup: "" }, martes: { materia: "Física I", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Ciencias de la Tierra I", tit: "Díaz Gabriela", sup: "" }, jueves: { materia: "Historia I", tit: "Aguirre Graciela", sup: "" }, viernes: { materia: "Matemática T", tit: "Pérez Sergio O.", sup: "Montes Johana" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Historia I", tit: "Aguirre Graciela", sup: "" }, martes: { materia: "Física I", tit: "Casal Omar", sup: "" }, miercoles: { materia: "Lengua Extranjera I", tit: "Valle Laura", sup: "López Mercedes" }, jueves: { materia: "Arte I", tit: "Ibarra Lorena", sup: "" }, viernes: { materia: "Matemática I", tit: "Pérez Sergio", sup: "Montes Johana" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, martes: { materia: "Química I", tit: "Canevari Celeste", sup: "" }, miercoles: { materia: "Lengua Extranjera I", tit: "Valle Laura", sup: "López Mercedes" }, jueves: { materia: "Arte I", tit: "Ibarra Lorena", sup: "" }, viernes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, martes: { materia: "Química I", tit: "Canevari Celeste", sup: "" }, miercoles: { materia: "Lengua Extranjera I", tit: "Valle Laura", sup: "López Mercedes" }, jueves: { materia: "Química T", tit: "Canevari Celeste", sup: "" }, viernes: { materia: "Biología I", tit: "Araoz Raquel", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, martes: { materia: "Química I", tit: "Canevari Celeste", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, jueves: { materia: "Química T", tit: "Canevari Celeste", sup: "" }, viernes: { materia: "Arte I", tit: "Ibarra Lorena", sup: "" } }
+                ],
+                edFisica: "Mamaní Valeria - Martes y Viernes 10:30 a 11:30"
+            },
+            "3° 1° - CS. SOCIALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Comunicación y Soc. I", tit: "Lobo Roxana", sup: "" }, martes: { materia: "Sociología I", tit: "Gómez Carina", sup: "Dan Olga" }, miercoles: { materia: "Comunicación y Soc. I", tit: "Lobo Roxana", sup: "" }, jueves: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, viernes: { materia: "Sociología I", tit: "Gómez Carina", sup: "Dan Olga" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Comunicación y Soc. I", tit: "Lobo Roxana", sup: "" }, martes: { materia: "Sociología I", tit: "Gómez Carina", sup: "Dan Olga" }, miercoles: { materia: "Comunicación y Soc. I", tit: "Lobo Roxana", sup: "" }, jueves: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, viernes: { materia: "Sociología I", tit: "Gómez Carina", sup: "Dan Olga" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, martes: { materia: "Historia Regional I", tit: "Santucho Valeria", sup: "" }, miercoles: { materia: "Historia Regional I", tit: "Santucho Valeria", sup: "" }, jueves: { materia: "Geografía T", tit: "Medrano Dante", sup: "" }, viernes: { materia: "Historia I", tit: "Santucho Valeria", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, martes: { materia: "Historia Regional I", tit: "Santucho Valeria", sup: "" }, miercoles: { materia: "Historia Regional I", tit: "Santucho Valeria", sup: "" }, jueves: { materia: "Geografía T", tit: "Medrano Dante", sup: "" }, viernes: { materia: "Historia I", tit: "Santucho Valeria", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, martes: { materia: "Matemática T", tit: "Guerrero Gabriela", sup: "" }, miercoles: { materia: "Biología T", tit: "Corbalán Maribel", sup: "Cuellar Carmen" }, jueves: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, viernes: { materia: "Historia I", tit: "Santucho Valeria", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Arte I", tit: "González Viviana", sup: "" }, martes: { materia: "Matemática T", tit: "Guerrero Gabriela", sup: "" }, miercoles: { materia: "Biología T", tit: "Corbalán Maribel", sup: "Cuellar Carmen" }, jueves: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "Rubio Daniela" }, viernes: { materia: "Matemática T", tit: "Guerrero Gabriela", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Arte I", tit: "González Viviana", sup: "" }, martes: { materia: "Biología T", tit: "Corbalán Maribel", sup: "Cuellar Carmen" }, miercoles: { materia: "Biología T", tit: "Corbalán Maribel", sup: "Cuellar Carmen" }, jueves: { materia: "Arte I", tit: "González Viviana", sup: "" }, viernes: { materia: "Matemática T", tit: "Guerrero Gabriela", sup: "" } }
+                ],
+                edFisica: "Figueroa Abel - Martes y Viernes 11:00 a 12:00"
+            },
+            "4° 1° - CS. NATURALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "López G. Mercedes" }, martes: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, miercoles: { materia: "Historia I", tit: "Santucho Valeria", sup: "" }, jueves: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, viernes: { materia: "Matemática I", tit: "Pérez Sergio", sup: "Nicolini Eduardo" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "López G. Mercedes" }, martes: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, miercoles: { materia: "Historia I", tit: "Santucho Valeria", sup: "" }, jueves: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, viernes: { materia: "Matemática T", tit: "Pérez Sergio", sup: "Nicolini Eduardo" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Rivero Claudia", sup: "" }, miercoles: { materia: "Ecología T", tit: "Ortiz Haide", sup: "" }, jueves: { materia: "Matemática T", tit: "Pérez Sergio", sup: "Nicolini Eduardo" }, viernes: { materia: "Lengua y Literatura I", tit: "Rivero Claudia", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Ecología T", tit: "Ortiz Haide", sup: "" }, martes: { materia: "Lengua y Literatura I", tit: "Rivero Claudia", sup: "" }, miercoles: { materia: "Ecología T", tit: "Ortiz Haide", sup: "" }, jueves: { materia: "Matemática T", tit: "Pérez Sergio", sup: "Nicolini Eduardo" }, viernes: { materia: "Lengua y Literatura I", tit: "Rivero Claudia", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Geografía T", tit: "Baima Eliseo", sup: "" }, martes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, miercoles: { materia: "Ecología T", tit: "Ortiz Haide", sup: "" }, jueves: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, viernes: { materia: "Filosofía I", tit: "Caballero María", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Geografía T", tit: "Baima Eliseo", sup: "" }, martes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, miercoles: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, jueves: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, viernes: { materia: "Filosofía I", tit: "Caballero María", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, martes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, miercoles: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, jueves: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Valle Laura", sup: "López G. Mercedes" } }
+                ],
+                edFisica: "Sanaveron Ariel - Lunes y Miércoles 11:00 a 12:00"
+            },
+            "4° 1° - CS. SOCIALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, martes: { materia: "Geografía T", tit: "Herrera Marcela", sup: "" }, miercoles: { materia: "Matemática T", tit: "Paz Juan", sup: "López Victoria" }, jueves: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, viernes: { materia: "Matemática T", tit: "Paz Juan", sup: "López Victoria" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, martes: { materia: "Geografía T", tit: "Herrera Marcela", sup: "" }, miercoles: { materia: "Matemática T", tit: "Paz Juan", sup: "López Victoria" }, jueves: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, viernes: { materia: "Matemática T", tit: "Paz Juan", sup: "López Victoria" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, martes: { materia: "Historia del Pensam. I", tit: "Gutiérrez Evelith", sup: "" }, miercoles: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "López G. Mercedes" }, jueves: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "López G. Mercedes" }, viernes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Física I", tit: "Reinaga S. Cintia", sup: "" }, martes: { materia: "Historia del Pensam. I", tit: "Gutiérrez Evelith", sup: "" }, miercoles: { materia: "Geografía Ambiental I", tit: "Alvarez Mariela", sup: "" }, jueves: { materia: "Lengua Extranjera I", tit: "Zerpa Romina", sup: "López G. Mercedes" }, viernes: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Geografía Ambiental I", tit: "Alvarez Mariela", sup: "" }, martes: { materia: "Historia I", tit: "Aguirre Graciela", sup: "" }, miercoles: { materia: "Historia del Pensam. I", tit: "Gutiérrez Evelith", sup: "" }, jueves: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, viernes: { materia: "Ciencias Políticas I", tit: "Causarano Vanesa", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Geografía Ambiental I", tit: "Alvarez Mariela", sup: "" }, martes: { materia: "Historia I", tit: "Aguirre Graciela", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Zerpa Noemi", sup: "" }, jueves: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, viernes: { materia: "Ciencias Políticas I", tit: "Causarano Vanesa", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Geografía Ambiental I", tit: "Alvarez Mariela", sup: "" }, martes: { materia: "Ciencias Políticas I", tit: "Causarano Vanesa", sup: "" }, miercoles: { materia: "Ciencias Políticas I", tit: "Causarano Vanesa", sup: "" }, jueves: { materia: "Filosofía I", tit: "Caballero María", sup: "" }, viernes: { materia: "Historia del Pensam. I", tit: "Gutiérrez Evelith", sup: "" } }
+                ],
+                edFisica: "Figueroa Abel - Martes y Jueves 10:00 a 11:00"
+            },
+            "5° 1° - CS. NATURALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, martes: { materia: "Psicología I", tit: "Santiapichi Angeles", sup: "" }, miercoles: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, jueves: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, viernes: { materia: "Form. Ética y Ciud. T", tit: "Sosa Rodolfo", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, martes: { materia: "Psicología I", tit: "Santiapichi Angeles", sup: "" }, miercoles: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, jueves: { materia: "Biología T", tit: "Ortiz Haide", sup: "" }, viernes: { materia: "Form. É. y Ciud. T", tit: "Sosa Rodolfo", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Matemática T", tit: "Fernández Sixto", sup: "López Victoria" }, martes: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Britos Cintia" }, miercoles: { materia: "Introd. a la Inv. Cs. Nat. T", tit: "Yugra Ricardo", sup: "Mamani Elena" }, jueves: { materia: "Matemática T", tit: "Fernández Sixto", sup: "" }, viernes: { materia: "Física y Astronomía T", tit: "Alvarez Gabriel", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Matemática T", tit: "Fernández Sixto", sup: "López Victoria" }, martes: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Britos Cintia" }, miercoles: { materia: "Introduc. a la Inv. Cs. Nat. T", tit: "Ricardo Yugra", sup: "Mamani Elena" }, jueves: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Britos Cintia" }, viernes: { materia: "Física y Astronomía T", tit: "Alvarez Gabriel", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Economía T", tit: "Pérez Javier", sup: "" }, martes: { materia: "Física y Astronomía I", tit: "Alvarez Gabriel", sup: "" }, miercoles: { materia: "Introduc. a la Inv. Cs. Nat. T", tit: "Yugra Ricardo", sup: "Mamani Elena" }, jueves: { materia: "Introd. a la Inv. Cs. Nat. T", tit: "Yugra Ricardo", sup: "Mamani Elena" }, viernes: { materia: "Lengua Extranjera T", tit: "Argañaraz Deborah", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Economía T", tit: "Pérez Javier", sup: "" }, martes: { materia: "Física y Astronomía I", tit: "Alvarez Gabriel", sup: "" }, miercoles: { materia: "Lengua y Literatura T", tit: "Ceballos Zulema", sup: "Britos Cintia" }, jueves: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Argañaraz Deborah", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Economía T", tit: "Pérez Javier", sup: "" }, martes: { materia: "Matemática T", tit: "Fernández Sixto", sup: "López Victoria" }, miercoles: { materia: "Lengua Extranjera I", tit: "Argañaraz Deborah", sup: "" }, jueves: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, viernes: { materia: "Introd. a la Inv. Cs. Nat. I", tit: "Yugra Ricardo", sup: "Mamani Elena" } }
+                ],
+                edFisica: "Sanaverón Ariel - Martes y Viernes 10:00 a 11:00"
+            },
+            "5° 1° - CS. SOCIALES": {
+                turno: "TARDE",
+                horario: [
+                    { hora: "13:30 - 14:10", lunes: { materia: "Territ. del Cap. Global T", tit: "Pérez Mariela", sup: "" }, martes: { materia: "Probl. Soc. Contemp. I", tit: "Gutiérrez G. Edith", sup: "" }, miercoles: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, jueves: { materia: "Matemática T", tit: "Llanos Noemi", sup: "Acuña Deborah" }, viernes: { materia: "Territ. del Cap. Global T", tit: "Pérez Mariela", sup: "" } },
+                    { hora: "14:10 - 14:50", lunes: { materia: "Territ. del Cap. Global T", tit: "Pérez Mariela", sup: "" }, martes: { materia: "Probl. Soc. Contemp. I", tit: "Gutiérrez G. Edith", sup: "" }, miercoles: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, jueves: { materia: "Matemática T", tit: "Llanos Noemi", sup: "Acuña Deborah" }, viernes: { materia: "Territ. del Cap. Global T", tit: "Pérez Mariela", sup: "" } },
+                    { hora: "15:00 - 15:40", lunes: { materia: "Psicología T", tit: "Santiapichi Angeles", sup: "" }, martes: { materia: "Matemática T", tit: "Llanos Noemi", sup: "Acuña Deborah" }, miercoles: { materia: "F. E. y C. I", tit: "Sosa Rodolfo", sup: "" }, jueves: { materia: "Economía T", tit: "Vargas Eduardo", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Dajer Marcelo", sup: "" } },
+                    { hora: "15:40 - 16:20", lunes: { materia: "Psicología T", tit: "Santiapichi Angeles", sup: "" }, martes: { materia: "Matemática T", tit: "Llanos Noemi", sup: "Acuña Deborah" }, miercoles: { materia: "F. E. y C. T", tit: "Sosa Rodolfo", sup: "" }, jueves: { materia: "Economía T", tit: "Vargas Eduardo", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Dajer Marcelo", sup: "" } },
+                    { hora: "16:25 - 17:05", lunes: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, martes: { materia: "Proy. de Investig. I", tit: "Gutiérrez Evelith", sup: "" }, miercoles: { materia: "Probl. Soc. Contemp. T", tit: "Gutiérrez G. Edith", sup: "" }, jueves: { materia: "Economía T", tit: "Vargas Eduardo", sup: "" }, viernes: { materia: "Lengua Extranjera T", tit: "Dajer Marcelo", sup: "" } },
+                    { hora: "17:05 - 17:45", lunes: { materia: "Química T", tit: "Ríos Claudia", sup: "" }, martes: { materia: "Proy. de Investig. I", tit: "Gutiérrez G. Evelith", sup: "" }, miercoles: { materia: "Probl. Soc. Contemp. I", tit: "Gutiérrez G. Edith", sup: "" }, jueves: { materia: "Proyecto de Investig. I", tit: "Gutiérrez G. Evelith", sup: "" }, viernes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" } },
+                    { hora: "17:45 - 18:25", lunes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, martes: { materia: "Proy. de Investig. I", tit: "Gutiérrez G. Evelith", sup: "" }, miercoles: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" }, jueves: { materia: "Proyecto de Investig. I", tit: "Gutiérrez G. Evelith", sup: "" }, viernes: { materia: "Lengua y Literatura I", tit: "Aguirre Lorena", sup: "" } }
+                ],
+                edFisica: "Tejerina Fabiana - Martes y Viernes 10:00 a 11:00"
+            }
+        };
+
+        let currentCourse = "";
+        let currentDay = "all";
+        let isAdmin = false;
+        let editingSlot = null;
+
+        function init() {
+            const courseSelect = document.getElementById('course-select');
+            Object.keys(scheduleData).forEach(course => {
+                const opt = document.createElement('option');
+                opt.value = course;
+                opt.textContent = course;
+                courseSelect.appendChild(opt);
+            });
+
+            courseSelect.addEventListener('change', function () {
+                currentCourse = this.value;
+                renderSchedule();
+            });
+
+            document.getElementById('day-select').addEventListener('change', function () {
+                currentDay = this.value;
+                renderSchedule();
+            });
+
+            const savedData = localStorage.getItem('scheduleData');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    Object.keys(parsed).forEach(course => {
+                        if (scheduleData[course]) {
+                            scheduleData[course] = parsed[course];
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error loading saved data');
+                }
+            }
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            
+            if (!currentCourse) {
+                container.innerHTML = '<div class="no-data"><p>Selecciona un curso para ver el horario</p></div>';
+                return;
+            }
+
+            const data = scheduleData[currentCourse];
+            if (!data) {
+                container.innerHTML = '<div class="no-data"><p>No se encontraron datos para este curso</p></div>';
+                return;
+            }
+
+            let html = `
+                <div class="course-title">${currentCourse}</div>
+                <div class="turno-badge">${data.turno}</div>
+                <div class="day-tabs">
+                    <div class="day-tab ${currentDay === 'all' ? 'active' : ''}" onclick="selectDay('all')">Todos</div>
+                    <div class="day-tab ${currentDay === 'lunes' ? 'active' : ''}" onclick="selectDay('lunes')">Lunes</div>
+                    <div class="day-tab ${currentDay === 'martes' ? 'active' : ''}" onclick="selectDay('martes')">Martes</div>
+                    <div class="day-tab ${currentDay === 'miercoles' ? 'active' : ''}" onclick="selectDay('miercoles')">Miércoles</div>
+                    <div class="day-tab ${currentDay === 'jueves' ? 'active' : ''}" onclick="selectDay('jueves')">Jueves</div>
+                    <div class="day-tab ${currentDay === 'viernes' ? 'active' : ''}" onclick="selectDay('viernes')">Viernes</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Horario</th>
+                            ${currentDay === 'all' || currentDay === 'lunes' ? '<th>LUNES</th>' : ''}
+                            ${currentDay === 'all' || currentDay === 'martes' ? '<th>MARTES</th>' : ''}
+                            ${currentDay === 'all' || currentDay === 'miercoles' ? '<th>MIÉRCOLES</th>' : ''}
+                            ${currentDay === 'all' || currentDay === 'jueves' ? '<th>JUEVES</th>' : ''}
+                            ${currentDay === 'all' || currentDay === 'viernes' ? '<th>VIERNES</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.horario.forEach((slot, idx) => {
+                html += `<tr><td class="time-cell">${slot.hora}</td>`;
+                
+                const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+                days.forEach(day => {
+                    if (currentDay === 'all' || currentDay === day) {
+                        const subject = slot[day];
+                        if (subject && subject.materia) {
+                            html += `
+                                <td class="subject-cell">
+                                    <span class="subject-name">${subject.materia}</span>
+                                    <span class="teacher-info">T: ${subject.tit}${subject.sup ? '<br>S: ' + subject.sup : ''}</span>
+                                    ${isAdmin ? `<button class="btn btn-secondary" style="margin-top:8px;padding:4px 8px;font-size:0.75em;" onclick="editSlot(${idx},'${day}')">✏️ Editar</button>` : ''}
+                                </td>
+                            `;
+                        } else {
+                            html += `<td class="empty-cell">-</td>`;
+                        }
+                    }
+                });
+                
+                html += '</tr>';
+            });
+
+            html += `</tbody></table>`;
+
+            if (data.edFisica) {
+                html += `
+                    <div class="pe-class">
+                        <h3>⚽ Educación Física</h3>
+                        <p>${data.edFisica}</p>
+                        ${isAdmin ? `<button class="btn btn-secondary" style="margin-top:10px;padding:6px 12px;font-size:0.85em;" onclick="editEdFisica()">✏️ Editar Ed. Física</button>` : ''}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function selectDay(day) {
+            currentDay = day;
+            renderSchedule();
+        }
+
+        function showAdminLogin() {
+            document.getElementById('admin-modal').classList.add('active');
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-error').style.display = 'none';
+        }
+
+        function verifyAdmin() {
+            const pwd = document.getElementById('admin-password').value;
+            if (pwd === 'sesamo') {
+                isAdmin = true;
+                closeModal('admin-modal');
+                renderSchedule();
+                showEditModal();
+            } else {
+                document.getElementById('admin-error').textContent = 'Contraseña incorrecta';
+                document.getElementById('admin-error').style.display = 'block';
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showEditModal() {
+            const modal = document.getElementById('edit-modal');
+            const form = document.getElementById('edit-form');
+            
+            let html = `
+                <div class="edit-form-group">
+                    <label>Seleccionar Franja Horaria</label>
+                    <select id="edit-time-slot" onchange="loadSlotForEdit()">
+                        <option value="">-- Seleccionar --</option>
+            `;
+
+            scheduleData[currentCourse].horario.forEach((slot, idx) => {
+                html += `<option value="${idx}">${slot.hora}</option>`;
+            });
+
+            html += `
+                    </select>
+                </div>
+                <div id="edit-fields" style="display:none;">
+            `;
+
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+            days.forEach(day => {
+                html += `
+                    <div class="edit-form-group">
+                        <label style="text-transform:uppercase;">${day}</label>
+                        <input type="text" id="edit-materia-${day}" placeholder="Materia">
+                        <input type="text" id="edit-tit-${day}" placeholder="Titular" style="margin-top:8px;">
+                        <input type="text" id="edit-sup-${day}" placeholder="Suplente" style="margin-top:8px;">
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            form.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function loadSlotForEdit() {
+            const slotIdx = document.getElementById('edit-time-slot').value;
+            const fieldsDiv = document.getElementById('edit-fields');
+            
+            if (slotIdx === '') {
+                fieldsDiv.style.display = 'none';
+                return;
+            }
+
+            fieldsDiv.style.display = 'block';
+            const slot = scheduleData[currentCourse].horario[slotIdx];
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+            
+            days.forEach(day => {
+                const subject = slot[day];
+                document.getElementById(`edit-materia-${day}`).value = subject.materia || '';
+                document.getElementById(`edit-tit-${day}`).value = subject.tit || '';
+                document.getElementById(`edit-sup-${day}`).value = subject.sup || '';
+            });
+        }
+
+        function editSlot(idx, day) {
+            showEditModal();
+            document.getElementById('edit-time-slot').value = idx;
+            loadSlotForEdit();
+        }
+
+        function editEdFisica() {
+            const newEdFisica = prompt("Editar Educación Física:", scheduleData[currentCourse].edFisica);
+            if (newEdFisica !== null) {
+                scheduleData[currentCourse].edFisica = newEdFisica;
+                saveToLocalStorage();
+                renderSchedule();
+                alert('¡Educación Física actualizada!');
+            }
+        }
+
+        function saveChanges() {
+            const slotIdx = document.getElementById('edit-time-slot').value;
+            if (slotIdx === '') {
+                alert('Selecciona una franja horaria');
+                return;
+            }
+
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+            days.forEach(day => {
+                scheduleData[currentCourse].horario[slotIdx][day] = {
+                    materia: document.getElementById(`edit-materia-${day}`).value,
+                    tit: document.getElementById(`edit-tit-${day}`).value,
+                    sup: document.getElementById(`edit-sup-${day}`).value
+                };
+            });
+
+            saveToLocalStorage();
+            
+            const successMsg = document.getElementById('save-success');
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+                closeModal('edit-modal');
+                renderSchedule();
+            }, 1500);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
+
